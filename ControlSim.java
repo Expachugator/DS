@@ -1,4 +1,3 @@
-import java.nio.channels.SelectableChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +10,7 @@ public class ControlSim {
 	public ControlSim() {
 	}
 
-	private void paramSim() {
+	public void paramSim() {
 		selecCorrales = new HashMap<Integer, CorralID>();
 		int key = 0;
 		while (usuario.getDato != null) {
@@ -21,8 +20,8 @@ public class ControlSim {
 		}
 	}
 
-	private Informe realizarSim() {
-		dia = usuario.getDia();
+	public Informe realizarSim() {
+		dias = usuario.getDia();
 		Informe informe = new Informe();
 		int e = vc.getE();
 		int pr = vc.getPr();
@@ -31,7 +30,7 @@ public class ControlSim {
 	}
 
 	private void calcularDatos(int e, int pr, Informe informe) {
-		for (int i = 0; i < dia; i++) {
+		for (int dia = 0; i < dias; i++) {
 			Iterator<CorralID> it = catCorrales.iterator();
 			float infectadosExt;
 			float sumInfectadosExt;
@@ -41,9 +40,7 @@ public class ControlSim {
 				int contagiados = it.getContagiados(corralID);
 				if (selecCorrales.contains(corralID)) {
 					float porcentaje = calcPorcentaje(poblacion, contagiados);
-					informe.setPoblacion(corralID, dia, poblacion);
-					informe.setContagiados(corralID, dia, contagiados);
-					informe.setPorcentaje(corralID, dia, porcentaje);
+					informe.newCorralInforme(corralID, poblacion, dia, contagiados, porcentaje);
 				}
 				int numTraslados = it.getNumTraslados(corralID);
 				for (int j = 0; j < numTraslados; j++) {
@@ -58,16 +55,10 @@ public class ControlSim {
 				catCorrales.setContagiados(corralID, totalContagiados);
 				if (selecCorrales.contains(corralID)) {
 					float porcentaje = calcPorcentaje(poblacion, totalContagiados);
-					informe.setContagiados(corralID, dia, totalContagiados);
-					informe.setPorcentaje(corralID, dia, porcentaje);
+					informe.setDatos(corralID, dia, totalContagiados, porcentaje);
 				}
 			}
-			sumDia(dia);
 		}
-	}
-
-	private void sumDia(int dia) {
-		dia = dia++;
 	}
 
 	private float calculaTotal(int contagiados, int pr, int e, int poblacion, float sumInfectadosExt) {
@@ -90,5 +81,4 @@ public class ControlSim {
 		porcentaje = totalContagiados / poblacion;
 		return porcentaje;
 	}
-
 }
