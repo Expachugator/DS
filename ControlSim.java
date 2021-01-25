@@ -5,7 +5,9 @@ import java.util.Iterator;
 public class ControlSim {
 
 	private HashMap<Integer, CorralID> selecCorrales;
-	private int dia;
+	private int dias;
+	private VectorContagio vc;
+	private HashMap<Integer, CorralID> catCorrales;
 
 	public ControlSim() {
 	}
@@ -20,48 +22,51 @@ public class ControlSim {
 		}
 	}
 
-	public Informe realizarSim() {
-		dias = usuario.getDia();
+	public Informe realizarSim(int dias) {
+		dias = dias;
 		Informe informe = new Informe();
-		int e = vc.getE();
-		int pr = vc.getPr();
+		float e = vc.getE();
+		float pr = vc.getE();
 		calcularDatos(e, pr, informe);
 		return informe;
 	}
 
-	private void calcularDatos(int e, int pr, Informe informe) {
-		for (int dia = 0; i < dias; i++) {
-			Iterator<CorralID> it = catCorrales.iterator();
-			float infectadosExt;
-			float sumInfectadosExt;
-			while (it.hasNext()) {
-				int corralID = it.getCorralID;
-				int poblacion = it.getPoblacion(corralID);
-				int contagiados = it.getContagiados(corralID);
-				if (selecCorrales.contains(corralID)) {
+	private void calcularDatos(float e, float pr, Informe informe) {
+		int numCorrales = catCorrales.size();
+		int poblacion;
+		int contagiados;
+		float porcentaje;
+		int numTraslados;
+		float infectadosExt;
+		float sumInfectadosExt;
+		for (int dia = 0; dia < dias; dia++) {
+			for (int corralID = 0; corralID < numCorrales; corralID++) {
+				poblacion = catCorrales.getPoblacion(corralID);
+				contagiados = catCorrales.getContagiados(corralID);
+				if (selecCorrales.containsKey(corralID)) {
 					float porcentaje = calcPorcentaje(poblacion, contagiados);
 					informe.newCorralInforme(corralID, poblacion, dia, contagiados, porcentaje);
 				}
-				int numTraslados = it.getNumTraslados(corralID);
-				for (int j = 0; j < numTraslados; j++) {
-					int trasladosNum = it.getTrasladosNum(corralID, j);
-					int corralIDOri = it.getCorralIDOri(corralID, j);
-					int poblacionOri = corrales.get(corralIDOri).getPoblacion();
-					int contagiadosOri = corrales.get(corralIDOri).getContagiados();
+				numTraslados = catCorrales.getNumTraslados(corralID);
+				for (int traslado = 1; traslado < numTraslados; traslado++) {
+					int trasladosNum = catCorrales.getTrasladosNum(corralID, traslado);
+					int corralIDOri = catCorrales.getCorralIDOri(corralID, traslado);
+					int poblacionOri = catCorrales.getPoblacion(corralIDOri);
+					int contagiadosOri = catCorrales.getContagiados(corralIDOri);
 					infectadosExt = calcInfectados(trasladosNum, poblacionOri, contagiadosOri);
 					sumInfectadosExt = sumInfectadosExt(sumInfectadosExt, infectadosExt);
 				}
 				float totalContagiados = calculaTotal(contagiados, pr, e, poblacion, sumInfectadosExt);
 				catCorrales.setContagiados(corralID, totalContagiados);
-				if (selecCorrales.contains(corralID)) {
-					float porcentaje = calcPorcentaje(poblacion, totalContagiados);
+				if (selecCorrales.containsKey(corralID)) {
+					porcentaje = calcPorcentaje(poblacion, totalContagiados);
 					informe.setDatos(corralID, dia, totalContagiados, porcentaje);
 				}
 			}
 		}
 	}
 
-	private float calculaTotal(int contagiados, int pr, int e, int poblacion, float sumInfectadosExt) {
+	private float calculaTotal(int contagiados, float pr, float e, int poblacion, float sumInfectadosExt) {
 		float infectados = contagiados + pr * e * (1 - contagiados / poblacion) * sumInfectadosExt;
 		return infectados;
 	}
